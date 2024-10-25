@@ -48,8 +48,8 @@ def highlighter_func(list_of_indices: list[tuple[int, int]], the_line: str) -> s
 def color_lines_filter(the_line: str, the_pattern: str, color: Literal["always", "never", "auto"]):
     global matched_at_least_once
     idx = find_pattern_indices(the_line, the_pattern)
-    # if idx == []:
-    #     return
+    if idx == []:
+        return
     if idx != []:
         if color == "auto":
             if sys.stdout.isatty():

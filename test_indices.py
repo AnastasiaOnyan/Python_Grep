@@ -14,7 +14,7 @@ CASES = [
     ("m", "meow", []),#grep doesn't return anything
     ("", "", [(0, -1)]),#grep returns an empty string
     ("01929838(())(&^%$", "0", [(0, 1)]),
-    ("m", "m", [(0, 0)])
+    ("m", "m", [(0, 1)]),
     ("meow", "", [(0, -1)]) #grep returns the whole string fron the file
 ]
 
