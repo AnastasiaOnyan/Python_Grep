@@ -46,10 +46,7 @@ def highlighter_func(list_of_indices: list[tuple[int, int]], the_line: str) -> s
 
 
 def color_lines_filter(the_line: str, the_pattern: str, color: Literal["always", "never", "auto"]):
-    global matched_at_least_once
     idx = find_pattern_indices(the_line, the_pattern)
-    if idx == []:
-        return
     if idx != []:
         if color == "auto":
             if sys.stdout.isatty():
@@ -61,15 +58,29 @@ def color_lines_filter(the_line: str, the_pattern: str, color: Literal["always",
         elif color == "never":
             print(the_line, end="")
     
+def get_matched_or_not(the_line: str, the_pattern: str, invert_match: bool) -> bool:
+    global matched_at_least_once
+    if args.invert_match:
+        if len(the_pattern) > len(the_line):
+            matched_at_least_once = True
+        elif the_pattern not in the_line:
+            matched_at_least_once = True
+    else:
+        if len(the_pattern) == 0 and len(the_line) > 0:
+            matched_at_least_once = True
+        elif the_pattern in the_line:
+            matched_at_least_once = True
+    return matched_at_least_once
+        
 
-def reverse_line(the_line: str, the_pattern: str, color: Literal["always", "never", "auto"], invert_match: bool):
+def print_if_matched(the_line: str, the_pattern: str, color: Literal["always", "never", "auto"], invert_match: bool):
     if args.invert_match:
         if the_pattern not in the_line:
             print(the_line, end="")
     else:
         color_lines_filter(the_line, the_pattern, color)
 
-        
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("pattern")
@@ -80,16 +91,26 @@ if __name__ == "__main__":
     pattern = args.pattern
     color = args.color
     invert_match = args.invert_match
+    matched = False
     
-
     if args.filename != None:
         with open(args.filename) as f:
             for line in f:
-                reverse_line(line, pattern, color, invert_match)
+                print_if_matched(line, pattern, color, invert_match)
+                get_matched_or_not(line, pattern, invert_match)
+                if matched_at_least_once:
+                    matched = True
     else:
         for line in sys.stdin:
-            reverse_line(line, pattern, color, invert_match)
-                    
-#sys.exit(1)
+            print_if_matched(line, pattern, color, invert_match)
+            get_matched_or_not(line, pattern, invert_match)
+            if matched_at_least_once:
+                matched = True
+                
+    if matched:
+        sys.exit(int(not matched_at_least_once))
+    else:
+        sys.exit(int(not matched_at_least_once))
+
 
 
